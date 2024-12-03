@@ -1,10 +1,13 @@
 package main
 
-import "strings"
+import (
+	"AOC/h"
+	"fmt"
+)
 
 func main() {
-	s := "123456789123456789"
-	a := strings.Index(s, "7")
-	b := strings.Index(s[10:], "7")
-	println(a, b)
+	lines := h.GetLinesAsSlice()
+	grid := h.ConvertLinesToGrid(lines)
+	fmt.Printf("%c", grid[2][1])
+	h.PrintGrid(grid)
 }

@@ -8,7 +8,38 @@ func main() {
 	extrapolateNumbers()
 	compareRunes()
 	compareRunesComplex()
+	streams()
+	stack()
 	println("Tests run successful")
+}
+
+func stack() {
+	stack := make([]int, 0)
+	h.Push(&stack, 1)
+	h.Push(&stack, 2)
+	_ = h.Pop(&stack)
+	_ = stack[len(stack)-1]
+	stack = stack[:len(stack)-1]
+}
+
+func streams() {
+	strs := []string{"123", " 456", "789"}
+	n, _ := h.StrSlToIntSlSoftFail(strs)
+	if n[0] != 123 || n[1] != 456 || n[2] != 789 {
+		panic("fail")
+	}
+	n = h.Map(strs, h.MapStrToInt)
+	if n[0] != 123 || n[1] != 456 || n[2] != 789 {
+		panic("fail")
+	}
+	sum := h.SumIntSl(n)
+	if sum != 1368 {
+		panic("fail")
+	}
+	rev := h.Map(strs, h.MapReverseString)
+	if rev[0] != "321" || rev[1] != "654 " || rev[2] != "987" {
+		panic("fail")
+	}
 }
 
 func compareRunesComplex() {
@@ -96,7 +127,7 @@ func extrapolateNumbers() {
 		panic("fail")
 	}
 	t6 := "(24778   15223)"
-	res = h.ExtrapolateNumbersFromStringIgnoreNonChar(t6)
+	res = h.ExtrapolateNumbersFromStringIgnoreNonDig(t6)
 	if res[0] != 24778 || res[1] != 15223 {
 		panic("fail")
 	}

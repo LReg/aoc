@@ -20,7 +20,7 @@ func Filter[T any](input []T, f func(T) bool) []T {
 	return result
 }
 
-func Reduce[T any](input []T, f func(T, T) T, initial T) T {
+func Reduce[T any, U any](input []T, f func(U, T) U, initial U) U {
 	result := initial
 	for _, v := range input {
 		result = f(result, v)

@@ -29,7 +29,7 @@ func ExtrapolateNumbersFromStringIgnore(s string, seperator string, ignore []str
 	return ExtrapolateNumbersFromString(s, seperator)
 }
 
-func ExtrapolateNumbersFromStringIgnoreNonChar(s string) []int {
+func ExtrapolateNumbersFromStringIgnoreNonDig(s string) []int {
 	return ExtrapolateNumbersFromString(RemoveNonDigits(s), " ")
 }
 
