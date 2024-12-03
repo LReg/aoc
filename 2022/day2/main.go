@@ -1,7 +1,7 @@
 package main
 
 import (
-	"AOC/helper"
+	"AOC/h"
 	"fmt"
 	"strings"
 )
@@ -21,7 +21,7 @@ func main() {
 }
 
 func part2() {
-	lines := helper.GetLinesAsSlice()
+	lines := h.GetLinesAsSlice()
 	sum := 0
 	for _, l := range lines {
 		game := strings.Split(l, " ")
@@ -73,7 +73,7 @@ func depCardScore(state STATE, enemy string) int {
 }
 
 func part1() {
-	lines := helper.GetLinesAsSlice()
+	lines := h.GetLinesAsSlice()
 	sum := 0
 	for _, l := range lines {
 		game := strings.Split(l, " ")

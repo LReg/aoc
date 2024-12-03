@@ -1,7 +1,7 @@
 package main
 
 import (
-	"AOC/helper"
+	"AOC/h"
 	"fmt"
 	"unicode"
 )
@@ -14,7 +14,7 @@ func main() {
 func part1() {
 	fmt.Println("Start")
 	sum := 0
-	lines := helper.GetLinesAsRuneSlices()
+	lines := h.GetLinesAsRuneSlices()
 	for _, sl := range lines {
 		half := len(sl) / 2
 		res := ' '
@@ -48,7 +48,7 @@ func prio(r rune) int {
 func part2() {
 	fmt.Println("Start")
 	sum := 0
-	lines := helper.GetLinesAsRuneSlices()
+	lines := h.GetLinesAsRuneSlices()
 
 	for i := 0; i < len(lines)/3; i++ {
 		item := ' '

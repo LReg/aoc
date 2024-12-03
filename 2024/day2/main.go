@@ -1,20 +1,20 @@
 package main
 
 import (
-	"AOC/helper"
+	"AOC/h"
 	"fmt"
 )
 
 func main() {
-	lines := helper.GetLinesAsSlice()
+	lines := h.GetLinesAsSlice()
 	sum := 0
 	for _, l := range lines {
-		nums := helper.ExtrapolateNumbersFromString(l, " ")
+		nums := h.ExtrapolateNumbersFromString(l, " ")
 		valid := true
 		inc := nums[0] < nums[1]
 		for i := 0; i+1 < len(nums); i++ {
 			rawDiff := nums[i] - nums[i+1]
-			diff := helper.Abs(nums[i] - nums[i+1])
+			diff := h.Abs(nums[i] - nums[i+1])
 
 			if diff < 1 || diff > 3 {
 				valid = false

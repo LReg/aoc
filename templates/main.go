@@ -1,19 +1,19 @@
 package main
 
 import (
-	"AOC/helper"
+	"AOC/h"
 	"fmt"
 )
 
 func main() {
+	fmt.Println("Start")
 	part1()
 	part2()
 }
 
 func part1() {
-	fmt.Println("Start")
 	sum := 0
-	lines := helper.GetLinesAsSlice()
+	lines := h.GetLinesAsSlice()
 
 	fmt.Println(sum)
 }

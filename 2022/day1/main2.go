@@ -1,14 +1,14 @@
 package main
 
 import (
-	"AOC/helper"
+	"AOC/h"
 	"fmt"
 	"sort"
 	"strconv"
 )
 
 func main() {
-	lines := helper.GetLinesAsSlice()
+	lines := h.GetLinesAsSlice()
 	elves := make([]int, 0)
 	cals := 0
 	for _, l := range lines {
