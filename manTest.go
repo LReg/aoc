@@ -6,8 +6,13 @@ import (
 )
 
 func main() {
+	sum := 0
 	lines := h.GetLinesAsSlice()
 	grid := h.ConvertLinesToGrid(lines)
-	fmt.Printf("%c", grid[2][1])
-	h.PrintGrid(grid)
+	p := h.Point{3, 5}
+
+	res := h.GridCompareByte(grid, p, h.HORIZONTALREVERSE, []byte("XMAS"))
+	fmt.Println("res", res)
+
+	fmt.Println("sum", sum)
 }
