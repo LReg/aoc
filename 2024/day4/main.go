@@ -52,10 +52,10 @@ func part2() {
 			res[i] = false
 		}
 
-		res[0] = h.GridCompareByteArr(grid, p, h.NORTHEAST, []byte("AS")) && h.GridCompareByteArr(grid, p, h.SOUTHWEST, []byte("AM"))
-		res[1] = h.GridCompareByteArr(grid, p, h.NORTHEAST, []byte("AM")) && h.GridCompareByteArr(grid, p, h.SOUTHWEST, []byte("AS"))
-		res[2] = h.GridCompareByteArr(grid, p, h.SOUTHEAST, []byte("AS")) && h.GridCompareByteArr(grid, p, h.NORTHWEST, []byte("AM"))
-		res[3] = h.GridCompareByteArr(grid, p, h.SOUTHEAST, []byte("AM")) && h.GridCompareByteArr(grid, p, h.NORTHWEST, []byte("AS"))
+		res[0] = grid.GridCompareByteArr(p, h.NORTHEAST, []byte("AS")) && grid.GridCompareByteArr(p, h.SOUTHWEST, []byte("AM"))
+		res[1] = grid.GridCompareByteArr(p, h.NORTHEAST, []byte("AM")) && grid.GridCompareByteArr(p, h.SOUTHWEST, []byte("AS"))
+		res[2] = grid.GridCompareByteArr(p, h.SOUTHEAST, []byte("AS")) && grid.GridCompareByteArr(p, h.NORTHWEST, []byte("AM"))
+		res[3] = grid.GridCompareByteArr(p, h.SOUTHEAST, []byte("AM")) && grid.GridCompareByteArr(p, h.NORTHWEST, []byte("AS"))
 
 		fmt.Println(res)
 
