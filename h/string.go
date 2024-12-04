@@ -43,6 +43,17 @@ func RemoveNonDigits(s string) string {
 	return string(runes)
 }
 
-func DelChar(s []rune, index int) []rune {
-	return append(s[0:index], s[index+1:]...)
+func StrSplitTwo(s string, sep string) (string, string) {
+	ar := strings.Split(s, sep)
+	return ar[0], ar[1]
+}
+
+func StrSplitThree(s string, sep string) (string, string, string) {
+	ar := strings.Split(s, sep)
+	return ar[0], ar[1], ar[2]
+}
+
+func StrSplitFour(s string, sep string) (string, string, string, string) {
+	ar := strings.Split(s, sep)
+	return ar[0], ar[1], ar[2], ar[3]
 }

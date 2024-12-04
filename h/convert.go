@@ -7,7 +7,7 @@ package h
 // for y, _ := range h.Iter(len(grid[0])) { ->zeile
 //
 //	for x, _ := range h.Iter(len(grid)) { ->spalte
-func ConvertLinesToGrid(lines []string) [][]byte {
+func ConvertLinesToGrid(lines []string) Grid {
 	longestLine := Reduce(lines, func(prev int, curr string) int {
 		l := len(curr)
 		if l > prev {

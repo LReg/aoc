@@ -1,20 +1,14 @@
 package h
 
-import "fmt"
-
-const (
-	HORIZONTAL = iota
-	VERTICAL
-	DIAGONALUP
-	DIAGONALDOWN
-	HORIZONTALREVERSE
-	VERTICALREVERSE
-	DIAGONALUPREVERSE
-	DIAGONALDOWNREVERSE
+import (
+	"fmt"
+	"strconv"
 )
 
-// GridCompareByte this is good for easy comparing of byte array in a grid
-func GridCompareByte(grid [][]byte, p Point, dir int, val []byte) bool {
+type Grid [][]byte
+
+// GridCompareByteArr this is good for easy comparing of byte array in a grid
+func (grid Grid) GridCompareByteArr(p Point, dir int, val []byte) bool {
 	same := false
 	WalkThroughLine(grid, dir, p, func(pos Point, i int) bool {
 		if grid[pos.X][pos.Y] != val[i] {
@@ -27,6 +21,20 @@ func GridCompareByte(grid [][]byte, p Point, dir int, val []byte) bool {
 		return true
 	})
 	return same
+}
+
+func (grid Grid) GridCompareStr(p Point, dir int, val string) bool {
+	return grid.GridCompareByteArr(p, dir, []byte(val))
+}
+
+func (grid Grid) HashValue() int {
+	hash := 0
+	for i, row := range grid {
+		for j, b := range row {
+			hash += i + j + int(b)
+		}
+	}
+	return hash
 }
 
 func IsPointInGrid[T any](grid [][]T, p Point) bool {
@@ -42,33 +50,70 @@ func IsPointInGrid[T any](grid [][]T, p Point) bool {
 	return true
 }
 
+func (grid Grid) ForEachPoint(f func(p Point)) {
+	WalkThrough(grid, EAST, Point{0, 0}, f)
+}
+
+func (grid Grid) At(p Point) byte {
+	return grid[p.X][p.Y]
+}
+
+func (grid Grid) AtNum(p Point) int {
+	n, _ := strconv.Atoi(string(grid.At(p)))
+	return n
+}
+
+// Set this mutates!
+func (grid Grid) Set(p Point, b byte) {
+	grid[p.X][p.Y] = b
+}
+
+func (grid Grid) Neighbours(p Point) []byte {
+	n := make([]byte, 0)
+	for _, dir := range GetAllDirs() {
+		p := p.Relative(dir)
+		if IsPointInGrid(grid, p) {
+			n = append(n, grid.At(p))
+		}
+	}
+	return n
+}
+
+func (grid Grid) BasicNeighbours(p Point) []byte {
+	n := make([]byte, 0)
+	for _, dir := range GetBasicDirs() {
+		n = append(n, grid.At(p.Relative(dir)))
+	}
+	return n
+}
+
 func WalkThrough[T any](grid [][]T, dir int, start Point, f func(p Point)) {
-	if dir == HORIZONTAL {
+	if dir == EAST {
 		for y := start.Y; y < len(grid[0]); y++ {
 			for x := start.X; x < len(grid); x++ {
 				f(Point{x, y})
 			}
 		}
-	} else if dir == VERTICAL {
+	} else if dir == NORTH {
 		for x := start.X; x < len(grid); x++ {
 			for y := start.Y; y < len(grid[0]); y++ {
 				f(Point{x, y})
 			}
 		}
-	} else if dir == DIAGONALUP {
+	} else if dir == NORTHEAST {
 		fmt.Println("[Warning]: Diagonal not implemented")
 	}
 }
 
 // WalkThroughLine bool at function return true -> continue, false -> break
 // looking back this function seems rather senseless for usage in scripts
-// it is rather just useful for the GridCompareByte function to make it maintainable
+// it is rather just useful for the GridCompareByteArr function to make it maintainable
 func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i int) bool) {
 	i := 0
 	if !IsPointInGrid(grid, start) {
 		return
 	}
-	if dir == HORIZONTAL {
+	if dir == EAST {
 		for x := start.X; x < len(grid); x++ {
 			b := f(Point{x, start.Y}, i)
 			i++
@@ -76,7 +121,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == HORIZONTALREVERSE {
+	} else if dir == WEST {
 		for x := start.X; x >= 0; x-- {
 			b := f(Point{x, start.Y}, i)
 			i++
@@ -84,7 +129,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == VERTICAL {
+	} else if dir == NORTH {
 		for y := start.Y; y < len(grid[0]); y++ {
 			b := f(Point{start.X, y}, i)
 			i++
@@ -92,7 +137,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == VERTICALREVERSE {
+	} else if dir == SOUTH {
 		for y := start.Y; y >= 0; y-- {
 			b := f(Point{start.X, y}, i)
 			i++
@@ -100,7 +145,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == DIAGONALUP {
+	} else if dir == NORTHEAST {
 		p := Point{start.X, start.Y}
 		for IsPointInGrid(grid, p) {
 			b := f(p, i)
@@ -111,7 +156,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == DIAGONALDOWN {
+	} else if dir == SOUTHEAST {
 		p := Point{start.X, start.Y}
 		for IsPointInGrid(grid, p) {
 			b := f(p, i)
@@ -122,7 +167,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == DIAGONALDOWNREVERSE {
+	} else if dir == SOUTHWEST {
 		p := Point{start.X, start.Y}
 		for IsPointInGrid(grid, p) {
 			b := f(p, i)
@@ -133,7 +178,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 				return
 			}
 		}
-	} else if dir == DIAGONALUPREVERSE {
+	} else if dir == NORTHWEST {
 		p := Point{start.X, start.Y}
 		for IsPointInGrid(grid, p) {
 			b := f(p, i)
@@ -145,4 +190,18 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			}
 		}
 	}
+}
+
+func Create3DIntGrid() [][][]int {
+	slice := make([][][]int, 0)
+	slice = append(slice, make([][]int, 0))
+	slice[0] = append(slice[0], make([]int, 0))
+	return slice
+}
+
+func Create3DByteGrid() [][][]byte {
+	slice := make([][][]byte, 0)
+	slice = append(slice, make([][]byte, 0))
+	slice[0] = append(slice[0], make([]byte, 0))
+	return slice
 }
