@@ -85,7 +85,7 @@ func (grid Grid) Dijkstra(start Point, end Point, weight func(p Point) int) ([]P
 			}
 		}
 	})
-	return Dijkstra(neighbourMap, start, end)
+	return DijkstraOld(neighbourMap, start, end, true)
 }
 
 func IsPointInGrid[T any](grid [][]T, p Point) bool {

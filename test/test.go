@@ -2,6 +2,8 @@ package main
 
 import (
 	"AOC/h"
+	"fmt"
+	"slices"
 )
 
 func main() {
@@ -10,6 +12,8 @@ func main() {
 	compareRunesComplex()
 	streams()
 	stack()
+	TestDijkstra()
+	TestDijkstra2()
 	println("Tests run successful")
 }
 
@@ -130,5 +134,58 @@ func extrapolateNumbers() {
 	res = h.ExtrapolateNumbersFromStringIgnoreNonDig(t6)
 	if res[0] != 24778 || res[1] != 15223 {
 		panic("fail")
+	}
+}
+
+func TestDijkstra() {
+	lines := make([]string, 0)
+	lines = append(lines, "111")
+	lines = append(lines, "991")
+	lines = append(lines, "991")
+
+	grid := h.ConvertLinesToGrid(lines)
+
+	// Testfälle vorbereiten
+	start := h.Point{X: 0, Y: 0}
+	end := h.Point{X: 2, Y: 2}
+
+	// Erwartete Ergebnisse
+	expectedPath := []h.Point{{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 2, Y: 0}, {X: 2, Y: 1}, {X: 2, Y: 2}}
+	expectedDistance := 4
+
+	// Funktion testen
+	path, distance := grid.DijkstraPosNum(start, end)
+
+	p := slices.EqualFunc(expectedPath, path, h.EqualsPoint)
+	d := distance == expectedDistance
+	if !p || !d {
+		panic("Dijksta failed")
+	}
+}
+
+func TestDijkstra2() {
+	lines := make([]string, 0)
+	lines = append(lines, "121")
+	lines = append(lines, "191")
+	lines = append(lines, "111")
+
+	grid := h.ConvertLinesToGrid(lines)
+
+	// Testfälle vorbereiten
+	start := h.Point{X: 0, Y: 0} // Startpunkt: Unten links
+	end := h.Point{X: 2, Y: 2}   // Endpunkt: Oben rechts
+
+	// Erwartete Ergebnisse
+	expectedPath := []h.Point{{X: 0, Y: 0}, {X: 0, Y: 1}, {X: 0, Y: 2}, {X: 1, Y: 2}, {X: 2, Y: 2}}
+	expectedDistance := 4
+
+	// Funktion testen
+	path, distance := grid.DijkstraPosNum(start, end)
+	fmt.Println(path, distance)
+
+	p := slices.EqualFunc(expectedPath, path, h.EqualsPoint)
+	d := distance == expectedDistance
+	if !p || !d {
+		panic("Dijkstra failed in second case")
 	}
 }
