@@ -37,6 +37,57 @@ func (grid Grid) HashValue() int {
 	return hash
 }
 
+func (grid Grid) Copy() Grid {
+	newGrid := make([][]byte, len(grid))
+	for i, row := range grid {
+		newGrid[i] = make([]byte, len(row))
+		copy(newGrid[i], row)
+	}
+	return newGrid
+}
+
+// return count changed
+func (grid Grid) FloodFillBasic(start Point, b byte, stopHere func(p Point) bool) int {
+	if !IsPointInGrid(grid, start) {
+		return 0
+	}
+	if grid[start.X][start.Y] == b {
+		return 0
+	}
+	if stopHere(start) {
+		return 0
+	}
+
+	grid[start.X][start.Y] = b
+	sumChanged := 1
+
+	for _, dir := range GetBasicDirs() {
+		sumChanged += grid.FloodFillBasic(start.Relative(dir), b, stopHere)
+	}
+	return sumChanged
+}
+
+func (grid Grid) DijkstraPosNum(start Point, end Point) ([]Point, int) {
+	return grid.Dijkstra(start, end, func(p Point) int {
+		return grid.AtNum(p)
+	})
+}
+
+func (grid Grid) Dijkstra(start Point, end Point, weight func(p Point) int) ([]Point, int) {
+	neighbourMap := make(map[Point][]Edge)
+	grid.ForEachPoint(func(p Point) {
+		neighbourMap[p] = make([]Edge, 0)
+		for _, dir := range GetBasicDirs() {
+			neighbour := p.Relative(dir)
+			if IsPointInGrid(grid, neighbour) {
+				weight := weight(neighbour)
+				neighbourMap[p] = append(neighbourMap[p], Edge{neighbour, weight})
+			}
+		}
+	})
+	return Dijkstra(neighbourMap, start, end)
+}
+
 func IsPointInGrid[T any](grid [][]T, p Point) bool {
 	if len(grid) == 0 || len(grid[0]) == 0 {
 		return false

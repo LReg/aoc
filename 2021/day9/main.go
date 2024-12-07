@@ -3,11 +3,12 @@ package main
 import (
 	"AOC/h"
 	"fmt"
+	"slices"
 )
 
 func main() {
 	fmt.Println("Start")
-	part1()
+	//part1()
 	part2()
 }
 
@@ -41,7 +42,7 @@ func part1() {
 }
 
 func part2() {
-	sum := 0
+	sum := 1
 	lines := h.GetLinesAsSlice()
 	grid := h.ConvertLinesToGrid(lines)
 	lows := make([]h.Point, 0)
@@ -62,8 +63,19 @@ func part2() {
 		}
 	})
 
-	// TODO floodfill
+	amountChanged := make([]int, 0)
+	for _, l := range lows {
+		amountChanged = append(amountChanged, grid.FloodFillBasic(l, byte('X'), func(p h.Point) bool {
+			if grid.At(p) == '9' {
+				return true
+			}
+			return false
+		}))
+	}
+	slices.Sort(amountChanged)
 
-	fmt.Println(lows)
+	for i := len(amountChanged) - 1; i > len(amountChanged)-4; i-- {
+		sum *= amountChanged[i]
+	}
 	fmt.Println(sum)
 }
