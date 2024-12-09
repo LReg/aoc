@@ -19,6 +19,10 @@ func StrSlToIntSlSoftFail(sl []string) ([]int, bool) {
 	return nums, failed
 }
 
+func StrSlToIntSl(sl []string) []int {
+	return Map(sl, MapStrToInt)
+}
+
 func SumIntSl(sl []int) int {
 	return Reduce(sl, ReduceSumInt, 0)
 }

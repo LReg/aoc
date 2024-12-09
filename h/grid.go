@@ -1,6 +1,7 @@
 package h
 
 import (
+	"cmp"
 	"fmt"
 	"strconv"
 )
@@ -74,14 +75,14 @@ func (grid Grid) DijkstraPosNum(start Point, end Point) ([]Point, int) {
 }
 
 func (grid Grid) Dijkstra(start Point, end Point, weight func(p Point) int) ([]Point, int) {
-	neighbourMap := make(map[Point][]Edge)
+	neighbourMap := make(map[Point][]Edge[int])
 	grid.ForEachPoint(func(p Point) {
-		neighbourMap[p] = make([]Edge, 0)
+		neighbourMap[p] = make([]Edge[int], 0)
 		for _, dir := range GetBasicDirs() {
 			neighbour := p.Relative(dir)
 			if IsPointInGrid(grid, neighbour) {
 				weight := weight(neighbour)
-				neighbourMap[p] = append(neighbourMap[p], Edge{neighbour, weight})
+				neighbourMap[p] = append(neighbourMap[p], Edge[int]{neighbour, weight})
 			}
 		}
 	})
@@ -255,4 +256,20 @@ func Create3DByteGrid() [][][]byte {
 	slice = append(slice, make([][]byte, 0))
 	slice[0] = append(slice[0], make([]byte, 0))
 	return slice
+}
+
+func CreateGrid(xMax int, yMax int) Grid {
+	grid := make([][]byte, xMax)
+	for i, _ := range grid {
+		grid[i] = make([]byte, yMax)
+	}
+	return grid
+}
+
+func CreateOrderedGrid[T cmp.Ordered](xMax int, yMax int) [][]T {
+	grid := make([][]T, xMax)
+	for i, _ := range grid {
+		grid[i] = make([]T, yMax)
+	}
+	return grid
 }

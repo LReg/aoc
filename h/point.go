@@ -74,6 +74,10 @@ func (p Point) IsInGrid(grid Grid) bool {
 	return IsPointInGrid(grid, p)
 }
 
+func (p Point) IsInQuad(from Point, to Point) bool {
+	return p.X >= from.X && p.Y >= from.Y && p.X <= to.X && p.Y <= to.Y
+}
+
 func (p Point) Relative(dir int) Point {
 	return p.RelativeN(dir, 1)
 }

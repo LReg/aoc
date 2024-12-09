@@ -1,16 +1,17 @@
 package h
 
 import (
+	"cmp"
 	"math"
 	"slices"
 )
 
-type Edge struct {
+type Edge[T cmp.Ordered] struct {
 	To     Point
 	Weight int
 }
 
-func Dijkstra(neighbourMap map[Point][]Edge, start Point, end Point, breakWhenFound bool) ([]Point, int) {
+func Dijkstra[T cmp.Ordered](neighbourMap map[Point][]Edge[T], start Point, end Point, breakWhenFound bool) ([]Point, int) {
 	distances := make(map[Point]int)
 	for point := range neighbourMap {
 		distances[point] = math.MaxInt
@@ -75,7 +76,8 @@ func Dijkstra(neighbourMap map[Point][]Edge, start Point, end Point, breakWhenFo
 	return path, distances[end]
 }
 
-func DijkstraOld(neighbourMap map[Point][]Edge, start Point, end Point, breakWhenFound bool) ([]Point, int) {
+// DijkstraOld runs better did not manage to improve the new one
+func DijkstraOld[T cmp.Ordered](neighbourMap map[Point][]Edge[T], start Point, end Point, breakWhenFound bool) ([]Point, int) {
 	distances := make(map[Point]int)
 	for point := range neighbourMap {
 		distances[point] = math.MaxInt

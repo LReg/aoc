@@ -1,11 +1,11 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
-	"slices"
 )
 
 func main() {
-	s := []int{7, 4, 5}
-	fmt.Println(slices.Min(s))
+	res := md5.Sum([]byte("abcdef609043"))
+	fmt.Println(str)
 }
