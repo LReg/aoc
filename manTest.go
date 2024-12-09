@@ -1,17 +1,11 @@
 package main
 
 import (
-	"AOC/h"
 	"fmt"
+	"slices"
 )
 
 func main() {
-	elements := []string{"ADD", "MULT"}
-	n := 2
-	result := h.CrossProduct(elements, n)
-
-	// Ergebnis ausgeben
-	for _, combination := range result {
-		fmt.Println(combination)
-	}
+	s := []int{7, 4, 5}
+	fmt.Println(slices.Min(s))
 }
