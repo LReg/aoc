@@ -12,7 +12,24 @@ type Edge[T cmp.Ordered | Point] struct {
 	To     T
 	Weight int
 }
+
+func NewEdge[T cmp.Ordered | Point](to T, weight int) Edge[T] {
+	return Edge[T]{To: to, Weight: weight}
+}
+
 type NeighbourMap[T cmp.Ordered | Point] map[T][]Edge[T]
+
+func NewNeighbourMap[T cmp.Ordered | Point]() NeighbourMap[T] {
+	return make(NeighbourMap[T])
+}
+func (n NeighbourMap[T]) AddEdge(from T, e Edge[T]) NeighbourMap[T] {
+	_, ok := n[from]
+	if !ok {
+		n[from] = []Edge[T]{}
+	}
+	n[from] = append(n[from], e)
+	return n
+}
 
 func Dijkstra[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end T, breakWhenFound bool) ([]T, int) {
 	distances := make(map[T]int)
@@ -256,4 +273,71 @@ func TSPReturnToStart[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T,
 	// TODO
 
 	return bestPath, bestWeight
+}
+
+func BFSNrOfPaths[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) int {
+	if dep == maxD {
+		return 0
+	}
+	if st == end {
+		return 1
+	}
+	neis := nei[st]
+	nFound := 0
+	for _, n := range neis {
+		nr := BFSNrOfPaths(nei, n.To, end, dep+1, maxD)
+		nFound += nr
+	}
+	return nFound
+}
+
+func BFSAnyFoundPath[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) bool {
+	if dep == maxD {
+		return false
+	}
+	if st == end {
+		return true
+	}
+	neis := nei[st]
+	anyFound := false
+	for _, n := range neis {
+		if BFSAnyFoundPath(nei, n.To, end, dep+1, maxD) {
+			anyFound = true
+		}
+	}
+	return anyFound
+}
+
+func BFSPath[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) []T {
+	if dep == maxD {
+		return []T{}
+	}
+	if st == end {
+		return []T{st}
+	}
+	neis := nei[st]
+	for _, n := range neis {
+		path := BFSPath(nei, n.To, end, dep+1, maxD)
+		if len(path) > 0 {
+			return append([]T{st}, path...)
+		}
+	}
+	return []T{}
+}
+
+func BFSPPathAndLength[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) ([]T, int) {
+	if dep == maxD {
+		return []T{}, math.MaxInt
+	}
+	if st == end {
+		return []T{st}, 0
+	}
+	neis := nei[st]
+	for _, n := range neis {
+		path, length := BFSPPathAndLength(nei, n.To, end, dep+1, maxD)
+		if len(path) > 0 {
+			return append([]T{st}, path...), length + 1
+		}
+	}
+	return []T{}, math.MaxInt
 }

@@ -19,7 +19,7 @@ func part1faster() {
 	grid := h.ConvertLinesToGrid(lines)
 	all0 := []h.Point{}
 	all9 := []h.Point{}
-	nei := h.NeighbourMap[h.Point]{}
+	nei := h.NewNeighbourMap[h.Point]()
 	grid.ForEachPoint(func(p h.Point) {
 		n := grid.AtNum(p)
 		if n == 0 {
@@ -29,39 +29,20 @@ func part1faster() {
 		}
 
 		neis := p.BasicNeighbours()
-		nei[p] = []h.Edge[h.Point]{}
 		for _, ni := range neis {
 			if ni.IsInGrid(grid) {
 				niNum := grid.AtNum(ni)
 				if n+1 == niNum {
-					nei[p] = append(nei[p], h.Edge[h.Point]{Weight: 1, To: ni})
+					nei.AddEdge(p, h.NewEdge(ni, 1))
 				}
 			}
 		}
 	})
 
-	var search func(h.Point, h.Point, int) bool
-	search = func(st h.Point, end h.Point, dep int) bool {
-		if dep == 10 {
-			return false
-		}
-		if st == end {
-			return true
-		}
-		neis := nei[st]
-		anyFound := false
-		for _, n := range neis {
-			if search(n.To, end, dep+1) {
-				anyFound = true
-			}
-		}
-		return anyFound
-	}
-
 	for _, z := range all0 {
 		score := 0
 		for _, n := range all9 {
-			if search(z, n, 0) {
+			if h.BFSAnyFoundPath(nei, z, n, 0, 10) {
 				score++
 			}
 		}
@@ -77,7 +58,7 @@ func part1() {
 	grid := h.ConvertLinesToGrid(lines)
 	all0 := []h.Point{}
 	all9 := []h.Point{}
-	nei := h.NeighbourMap[h.Point]{}
+	nei := h.NewNeighbourMap[h.Point]()
 	grid.ForEachPoint(func(p h.Point) {
 		n := grid.AtNum(p)
 		if n == 0 {
@@ -87,12 +68,11 @@ func part1() {
 		}
 
 		neis := p.BasicNeighbours()
-		nei[p] = []h.Edge[h.Point]{}
 		for _, ni := range neis {
 			if ni.IsInGrid(grid) {
 				niNum := grid.AtNum(ni)
 				if n+1 == niNum {
-					nei[p] = append(nei[p], h.Edge[h.Point]{Weight: 1, To: ni})
+					nei.AddEdge(p, h.NewEdge(ni, 1))
 				}
 			}
 		}
@@ -119,7 +99,7 @@ func part2() {
 	grid := h.ConvertLinesToGrid(lines)
 	all0 := []h.Point{}
 	all9 := []h.Point{}
-	nei := h.NeighbourMap[h.Point]{}
+	nei := h.NewNeighbourMap[h.Point]()
 	grid.ForEachPoint(func(p h.Point) {
 		n := grid.AtNum(p)
 		if n == 0 {
@@ -129,38 +109,20 @@ func part2() {
 		}
 
 		neis := p.BasicNeighbours()
-		nei[p] = []h.Edge[h.Point]{}
 		for _, ni := range neis {
 			if ni.IsInGrid(grid) {
 				niNum := grid.AtNum(ni)
 				if n+1 == niNum {
-					nei[p] = append(nei[p], h.Edge[h.Point]{Weight: 1, To: ni})
+					nei = nei.AddEdge(p, h.NewEdge(ni, 1))
 				}
 			}
 		}
 	})
 
-	var search func(h.Point, h.Point, int) int
-	search = func(st h.Point, end h.Point, dep int) int {
-		if dep == 10 {
-			return 0
-		}
-		if st == end {
-			return 1
-		}
-		neis := nei[st]
-		nFound := 0
-		for _, n := range neis {
-			nr := search(n.To, end, dep+1)
-			nFound += nr
-		}
-		return nFound
-	}
-
 	for _, z := range all0 {
 		score := 0
 		for _, n := range all9 {
-			nFound := search(z, n, 0)
+			nFound := h.BFSNrOfPaths(nei, z, n, 0, 10)
 			score += nFound
 		}
 		sum += score
