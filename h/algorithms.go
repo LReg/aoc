@@ -30,6 +30,38 @@ func (n NeighbourMap[T]) AddEdge(from T, e Edge[T]) NeighbourMap[T] {
 	n[from] = append(n[from], e)
 	return n
 }
+func (n NeighbourMap[T]) CanTravel(from T, to T) bool {
+	for _, next := range n[from] {
+		if next.To == to {
+			return true
+		}
+	}
+	return false
+}
+
+func (n NeighbourMap[T]) Weight(from T, to T) int {
+	for _, e := range n[from] {
+		if e.To == to {
+			return e.Weight
+		}
+	}
+	return -1
+}
+
+func (n NeighbourMap[T]) AllVertex() []T {
+	allVertex := make([]T, 0)
+	for from, edges := range n {
+		if !slices.Contains(allVertex, from) {
+			allVertex = append(allVertex, from)
+		}
+		for _, e := range edges {
+			if !slices.Contains(allVertex, e.To) {
+				allVertex = append(allVertex, e.To)
+			}
+		}
+	}
+	return allVertex
+}
 
 func Dijkstra[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end T, breakWhenFound bool) ([]T, int) {
 	distances := make(map[T]int)
@@ -153,12 +185,11 @@ func DijkstraOld[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, e
 
 type FWMatrix[T cmp.Ordered | Point] map[T]map[T]int
 
-func (m FWMatrix[string]) PrintStr() {
-
+func (m FWMatrix[T]) PrintStr() {
 	fmt.Println("-------")
 
-	allVertex := make([]string, 0)
-	allVertexReversed := make([]string, 0)
+	allVertex := make([]T, 0)
+	allVertexReversed := make([]T, 0)
 	for to := range m {
 		allVertex = append(allVertex, to)
 		allVertexReversed = append(allVertexReversed, to)
@@ -190,17 +221,7 @@ func (m FWMatrix[string]) PrintStr() {
 
 func FloydWarshall[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) FWMatrix[T] {
 	matrix := make(FWMatrix[T])
-	allVertex := make([]T, 0)
-	for from, edges := range neighbourMap {
-		if !slices.Contains(allVertex, from) {
-			allVertex = append(allVertex, from)
-		}
-		for _, e := range edges {
-			if !slices.Contains(allVertex, e.To) {
-				allVertex = append(allVertex, e.To)
-			}
-		}
-	}
+	allVertex := neighbourMap.AllVertex()
 
 	for _, from := range allVertex {
 		matrix[from] = make(map[T]int)
@@ -254,7 +275,95 @@ func Permutations[T any](possibleElements []T, n int) [][]T {
 }
 
 func TSPReturnToStart[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T, int) {
+	allVertex := neighbourMap.AllVertex()
 
+	bestPath := make([]T, 0)
+	bestWeight := math.MaxInt
+
+	var tspHelper func(path []T, visited map[T]bool, currentWeight int)
+	tspHelper = func(path []T, visited map[T]bool, currentWeight int) {
+		if len(path) == len(allVertex) {
+			start := path[0]
+			last := path[len(path)-1]
+			for _, edge := range neighbourMap[last] {
+				if edge.To == start {
+					totalWeight := currentWeight + edge.Weight
+					if totalWeight < bestWeight {
+						bestWeight = totalWeight
+						bestPath = append([]T{}, path...)
+						bestPath = append(bestPath, start)
+					}
+					break
+				}
+			}
+			return
+		}
+
+		current := path[len(path)-1]
+		for _, edge := range neighbourMap[current] {
+			if !visited[edge.To] {
+				visited[edge.To] = true
+				tspHelper(append(slices.Clone(path), edge.To), visited, currentWeight+edge.Weight)
+				visited[edge.To] = false
+			}
+		}
+	}
+
+	for _, start := range allVertex {
+		visited := make(map[T]bool)
+		visited[start] = true
+		tspHelper([]T{start}, visited, 0)
+	}
+
+	return bestPath, bestWeight
+}
+
+func TSPReturnToStartLongestPath[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T, int) {
+	allVertex := neighbourMap.AllVertex()
+
+	bestPath := make([]T, 0)
+	bestWeight := 0
+
+	var tspHelper func(path []T, visited map[T]bool, currentWeight int)
+	tspHelper = func(path []T, visited map[T]bool, currentWeight int) {
+		if len(path) == len(allVertex) {
+			start := path[0]
+			last := path[len(path)-1]
+			for _, edge := range neighbourMap[last] {
+				if edge.To == start {
+					totalWeight := currentWeight + edge.Weight
+					if totalWeight > bestWeight {
+						bestWeight = totalWeight
+						bestPath = append([]T{}, path...)
+						bestPath = append(bestPath, start)
+					}
+					break
+				}
+			}
+			return
+		}
+
+		current := path[len(path)-1]
+		for _, edge := range neighbourMap[current] {
+			if !visited[edge.To] {
+				visited[edge.To] = true
+				tspHelper(append(slices.Clone(path), edge.To), visited, currentWeight+edge.Weight)
+				visited[edge.To] = false
+			}
+		}
+	}
+
+	for _, start := range allVertex {
+		visited := make(map[T]bool)
+		visited[start] = true
+		tspHelper([]T{start}, visited, 0)
+	}
+
+	return bestPath, bestWeight
+}
+
+func TSP[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T, int) {
+	// Alle Knoten sammeln
 	allVertex := make([]T, 0)
 	for from, edges := range neighbourMap {
 		if !slices.Contains(allVertex, from) {
@@ -270,7 +379,67 @@ func TSPReturnToStart[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T,
 	bestPath := make([]T, 0)
 	bestWeight := math.MaxInt
 
-	// TODO
+	var tspHelper func(path []T, visited map[T]bool, currentWeight int)
+	tspHelper = func(path []T, visited map[T]bool, currentWeight int) {
+		if len(path) == len(allVertex) {
+			if currentWeight < bestWeight {
+				bestWeight = currentWeight
+				bestPath = append([]T{}, path...)
+			}
+			return
+		}
+
+		current := path[len(path)-1]
+		for _, edge := range neighbourMap[current] {
+			if !visited[edge.To] {
+				visited[edge.To] = true
+				tspHelper(append(slices.Clone(path), edge.To), visited, currentWeight+edge.Weight)
+				visited[edge.To] = false
+			}
+		}
+	}
+
+	for _, start := range allVertex {
+		visited := make(map[T]bool)
+		visited[start] = true
+		tspHelper([]T{start}, visited, 0)
+	}
+
+	return bestPath, bestWeight
+}
+
+func TSPLongestPath[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T, int) {
+	// Alle Knoten sammeln
+	allVertex := neighbourMap.AllVertex()
+
+	bestPath := make([]T, 0)
+	bestWeight := 0
+
+	var tspHelper func(path []T, visited map[T]bool, currentWeight int)
+	tspHelper = func(path []T, visited map[T]bool, currentWeight int) {
+		if len(path) == len(allVertex) {
+			if currentWeight > bestWeight {
+				bestWeight = currentWeight
+				bestPath = append([]T{}, path...)
+			}
+			return
+		}
+
+		current := path[len(path)-1]
+		for _, edge := range neighbourMap[current] {
+			if !visited[edge.To] {
+				visited[edge.To] = true
+				tspHelper(append(slices.Clone(path), edge.To), visited, currentWeight+edge.Weight)
+				visited[edge.To] = false
+			}
+		}
+	}
+
+	for _, start := range allVertex {
+		visited := make(map[T]bool)
+		visited[start] = true
+		tspHelper([]T{start}, visited, 0)
+	}
 
 	return bestPath, bestWeight
 }

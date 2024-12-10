@@ -1,11 +1,11 @@
 package main
 
-import (
-	"crypto/md5"
-	"fmt"
-)
+import "fmt"
 
 func main() {
-	res := md5.Sum([]byte("abcdef609043"))
-	fmt.Println(str)
+	a := []int{1, 1, 1, 1}
+	b := append(a, 2)
+	c := append(a, 3)
+	a[0] = 0
+	fmt.Println(a, b, c)
 }
