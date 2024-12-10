@@ -74,19 +74,33 @@ func (grid Grid) DijkstraPosNum(start Point, end Point) ([]Point, int) {
 	})
 }
 
-func (grid Grid) Dijkstra(start Point, end Point, weight func(p Point) int) ([]Point, int) {
-	neighbourMap := make(map[Point][]Edge[int])
+func (grid Grid) ProduceNeighbourMap(weight func(p Point) int) map[Point][]Edge[Point] {
+	neighbourMap := make(map[Point][]Edge[Point])
 	grid.ForEachPoint(func(p Point) {
-		neighbourMap[p] = make([]Edge[int], 0)
+		neighbourMap[p] = make([]Edge[Point], 0)
 		for _, dir := range GetBasicDirs() {
 			neighbour := p.Relative(dir)
 			if IsPointInGrid(grid, neighbour) {
 				weight := weight(neighbour)
-				neighbourMap[p] = append(neighbourMap[p], Edge[int]{neighbour, weight})
+				neighbourMap[p] = append(neighbourMap[p], Edge[Point]{neighbour, weight})
 			}
 		}
 	})
-	return DijkstraOld(neighbourMap, start, end, true)
+	return neighbourMap
+}
+
+func (grid Grid) FloydWarshallPosNum() FWMatrix[Point] {
+	return FloydWarshall(grid.ProduceNeighbourMap(func(p Point) int {
+		return grid.AtNum(p)
+	}))
+}
+
+func (grid Grid) FloydWarshall(weight func(p Point) int) FWMatrix[Point] {
+	return FloydWarshall(grid.ProduceNeighbourMap(weight))
+}
+
+func (grid Grid) Dijkstra(start Point, end Point, weight func(p Point) int) ([]Point, int) {
+	return DijkstraOld[Point](grid.ProduceNeighbourMap(weight), start, end, true)
 }
 
 func IsPointInGrid[T any](grid [][]T, p Point) bool {

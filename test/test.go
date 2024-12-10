@@ -14,6 +14,8 @@ func main() {
 	stack()
 	TestDijkstra()
 	TestDijkstra2()
+	TestFloydWarshall()
+	TestTSPBackToStart()
 	println("Tests run successful")
 }
 
@@ -181,11 +183,44 @@ func TestDijkstra2() {
 
 	// Funktion testen
 	path, distance := grid.DijkstraPosNum(start, end)
-	fmt.Println(path, distance)
 
 	p := slices.EqualFunc(expectedPath, path, h.EqualsPoint)
 	d := distance == expectedDistance
 	if !p || !d {
 		panic("Dijkstra failed in second case")
 	}
+}
+
+func TestFloydWarshall() {
+	lines := make([]string, 0)
+	lines = append(lines, "121")
+	lines = append(lines, "191")
+	lines = append(lines, "111")
+
+	grid := h.ConvertLinesToGrid(lines)
+
+	// Erwartete Ergebnisse
+	expectedDistance := 4
+
+	// Funktion testen
+	matrix := grid.FloydWarshallPosNum()
+
+	d := matrix[h.P(0, 0)][h.P(2, 2)]
+	fmt.Println(d)
+
+	if d != expectedDistance {
+		panic("Floyd Warshal failed")
+	}
+}
+
+func TestTSPBackToStart() {
+	n := h.NeighbourMap[int]{
+		0: []h.Edge[int]{{Weight: 1, To: 1}},
+		1: []h.Edge[int]{{Weight: 1, To: 2}, {Weight: 100, To: 4}},
+		2: []h.Edge[int]{{Weight: 1, To: 3}, {Weight: 4, To: 4}},
+		3: []h.Edge[int]{{Weight: 1, To: 0}},
+		4: []h.Edge[int]{{Weight: 4, To: 3}},
+	}
+	path, l := h.TSPReturnToStart(n)
+	fmt.Println(path, l)
 }

@@ -33,7 +33,7 @@ func part1() {
 			}
 		})
 
-		combinations := h.CrossProduct(positions, 2)
+		combinations := h.Permutations(positions, 2)
 		combinations = h.Filter(combinations, func(c []h.Point) bool {
 			if c[0] == c[1] {
 				return false
@@ -79,7 +79,7 @@ func part2() {
 			}
 		})
 
-		combinations := h.CrossProduct(positions, 2)
+		combinations := h.Permutations(positions, 2)
 		combinations = h.Filter(combinations, func(c []h.Point) bool {
 			if c[0] == c[1] {
 				return false

@@ -18,6 +18,10 @@ func EqualsPoint(p1 Point, p2 Point) bool {
 	return p1.X == p2.X && p1.Y == p2.Y
 }
 
+func P(x int, y int) Point {
+	return Point{x, y}
+}
+
 func (p Point) RelativeN(dir int, n int) Point {
 	switch dir {
 	case NORTH:

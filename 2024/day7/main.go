@@ -26,7 +26,7 @@ func part2() {
 		parts := strings.Split(l, ":")
 		res, _ := strconv.Atoi(parts[0])
 		vals := h.ExtrapolateNumbersFromString(parts[1], " ")
-		cp := h.CrossProduct([]int{ADD, MUL, CONCAT}, len(vals)-1)
+		cp := h.Permutations([]int{ADD, MUL, CONCAT}, len(vals)-1)
 		for _, p := range cp {
 			acRes := vals[0]
 			for i, operation := range p {
@@ -55,7 +55,7 @@ func part1() {
 		parts := strings.Split(l, ":")
 		res, _ := strconv.Atoi(parts[0])
 		vals := h.ExtrapolateNumbersFromString(parts[1], " ")
-		cp := h.CrossProduct([]int{ADD, MUL}, len(vals)-1)
+		cp := h.Permutations([]int{ADD, MUL}, len(vals)-1)
 		for _, p := range cp {
 			acRes := vals[0]
 			for i, operation := range p {
