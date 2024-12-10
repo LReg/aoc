@@ -42,7 +42,13 @@ func part1faster() {
 	for _, z := range all0 {
 		score := 0
 		for _, n := range all9 {
-			if h.BFSAnyFoundPath(nei, z, n, 0, 10) {
+			if h.DFSAnyFoundPath(nei, z, func(p h.Point) bool {
+				if p == n {
+					return true
+				} else {
+					return false
+				}
+			}, 0, 10) {
 				score++
 			}
 		}
@@ -122,7 +128,13 @@ func part2() {
 	for _, z := range all0 {
 		score := 0
 		for _, n := range all9 {
-			nFound := h.BFSNrOfPaths(nei, z, n, 0, 10)
+			nFound := h.DFSNrOfPaths(nei, z, func(p h.Point) bool {
+				if p == n {
+					return true
+				} else {
+					return false
+				}
+			}, 0, 10)
 			score += nFound
 		}
 		sum += score

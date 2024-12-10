@@ -63,7 +63,7 @@ func (n NeighbourMap[T]) AllVertex() []T {
 	return allVertex
 }
 
-func Dijkstra[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end T, breakWhenFound bool) ([]T, int) {
+func Dijkstra[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end T) ([]T, int) {
 	distances := make(map[T]int)
 	for point := range neighbourMap {
 		distances[point] = math.MaxInt
@@ -129,7 +129,7 @@ func Dijkstra[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end 
 }
 
 // DijkstraOld runs better did not manage to improve the new one
-func DijkstraOld[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end T, breakWhenFound bool) ([]T, int) {
+func DijkstraOld[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end T) ([]T, int) {
 	distances := make(map[T]int)
 	for point := range neighbourMap {
 		distances[point] = math.MaxInt
@@ -139,6 +139,7 @@ func DijkstraOld[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, e
 
 	unvisited := make([]T, 1)
 	unvisited[0] = start
+	visited := make(map[T]bool)
 
 	for len(unvisited) > 0 {
 		// find the node with the smallest distance
@@ -155,6 +156,8 @@ func DijkstraOld[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, e
 			break
 		}
 
+		visited[nearestPoint] = true
+
 		// remove the node from the unvisited list
 		unvisited = slices.DeleteFunc(unvisited, func(p T) bool {
 			return p == nearestPoint
@@ -162,6 +165,9 @@ func DijkstraOld[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, e
 
 		// update neighbour distances and add them to the unvisited list
 		for _, neighbour := range neighbourMap[nearestPoint] {
+			if visited[neighbour.To] {
+				continue
+			}
 			newDistance := distances[nearestPoint] + neighbour.Weight
 			if newDistance < distances[neighbour.To] {
 				distances[neighbour.To] = newDistance
@@ -444,68 +450,76 @@ func TSPLongestPath[T cmp.Ordered | Point](neighbourMap NeighbourMap[T]) ([]T, i
 	return bestPath, bestWeight
 }
 
-func BFSNrOfPaths[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) int {
+func DFSNrOfPaths[T cmp.Ordered | Point](nei NeighbourMap[T], st T, goalCondition func(p T) bool, dep int, maxD int) int {
 	if dep == maxD {
 		return 0
 	}
-	if st == end {
+	if goalCondition(st) {
 		return 1
 	}
 	neis := nei[st]
 	nFound := 0
 	for _, n := range neis {
-		nr := BFSNrOfPaths(nei, n.To, end, dep+1, maxD)
+		nr := DFSNrOfPaths(nei, n.To, goalCondition, dep+1, maxD)
 		nFound += nr
 	}
 	return nFound
 }
 
-func BFSAnyFoundPath[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) bool {
-	if dep == maxD {
-		return false
-	}
-	if st == end {
-		return true
-	}
-	neis := nei[st]
-	anyFound := false
-	for _, n := range neis {
-		if BFSAnyFoundPath(nei, n.To, end, dep+1, maxD) {
-			anyFound = true
-		}
-	}
-	return anyFound
+func DFSAnyFoundPath[T cmp.Ordered | Point](nei NeighbourMap[T], st T, goalCondition func(p T) bool, dep int, maxD int) bool {
+	_, l := DFS(nei, st, goalCondition, dep, maxD)
+	return l != math.MaxInt
 }
 
-func BFSPath[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) []T {
-	if dep == maxD {
-		return []T{}
-	}
-	if st == end {
-		return []T{st}
-	}
-	neis := nei[st]
-	for _, n := range neis {
-		path := BFSPath(nei, n.To, end, dep+1, maxD)
-		if len(path) > 0 {
-			return append([]T{st}, path...)
-		}
-	}
-	return []T{}
-}
-
-func BFSPPathAndLength[T cmp.Ordered | Point](nei NeighbourMap[T], st T, end T, dep int, maxD int) ([]T, int) {
+func DFS[T cmp.Ordered | Point](nei NeighbourMap[T], st T, goalCondition func(p T) bool, dep int, maxD int) ([]T, int) {
 	if dep == maxD {
 		return []T{}, math.MaxInt
 	}
-	if st == end {
+	if goalCondition(st) {
 		return []T{st}, 0
 	}
 	neis := nei[st]
 	for _, n := range neis {
-		path, length := BFSPPathAndLength(nei, n.To, end, dep+1, maxD)
+		path, length := DFS(nei, n.To, goalCondition, dep+1, maxD)
 		if len(path) > 0 {
 			return append([]T{st}, path...), length + 1
+		}
+	}
+	return []T{}, math.MaxInt
+}
+
+func BFS[T cmp.Ordered | Point](nei NeighbourMap[T], st T, goalCondition func(p T) bool) ([]T, int) {
+	distances := map[T]int{}
+	visited := map[T]bool{}
+	previous := map[T]T{}
+	open := []T{st}
+
+	visited[st] = true
+	distances[st] = 0
+
+	for len(open) > 0 {
+		el := open[0]
+		open = open[1:]
+		visited[el] = true
+
+		for _, e := range nei[el] {
+			if visited[e.To] || slices.Contains(open, e.To) {
+				continue
+			}
+			distances[e.To] = distances[el] + e.Weight
+			previous[e.To] = el
+
+			if goalCondition(e.To) {
+				path := make([]T, 0)
+				for point := e.To; point != st; point = previous[point] {
+					path = append(path, point)
+				}
+				path = append(path, st)
+				slices.Reverse(path)
+				return path, distances[e.To]
+			}
+
+			open = append(open, e.To)
 		}
 	}
 	return []T{}, math.MaxInt

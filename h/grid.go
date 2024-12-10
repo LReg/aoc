@@ -100,7 +100,7 @@ func (grid Grid) FloydWarshall(weight func(p Point) int) FWMatrix[Point] {
 }
 
 func (grid Grid) Dijkstra(start Point, end Point, weight func(p Point) int) ([]Point, int) {
-	return DijkstraOld[Point](grid.ProduceNeighbourMap(weight), start, end, true)
+	return DijkstraOld[Point](grid.ProduceNeighbourMap(weight), start, end)
 }
 
 func IsPointInGrid[T any](grid [][]T, p Point) bool {
