@@ -50,8 +50,8 @@ func part1() {
 		}
 	})
 
-	path, l := h.DijkstraOld(neighbours, start, end)
-	fmt.Println(path, l)
+	_, l := h.Dijkstra(neighbours, start, end)
+	fmt.Println("part 1:", l)
 }
 
 func part2() {
@@ -89,13 +89,13 @@ func part2() {
 		}
 	})
 
-	path, l := h.BFS(neighbours, end, func(p h.Point) bool {
+	_, l := h.BFS(neighbours, end, func(p h.Point) bool {
 		if grid.At(p) == 'a' {
 			return true
 		} else {
 			return false
 		}
 	})
-	fmt.Println(path, l)
+	fmt.Println("part 2", l)
 
 }

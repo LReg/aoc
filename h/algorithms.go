@@ -71,49 +71,33 @@ func Dijkstra[T cmp.Ordered | Point](neighbourMap map[T][]Edge[T], start T, end 
 	distances[start] = 0
 	previos := make(map[T]T)
 
-	unvisited := make([]T, 1)
-	unvisited[0] = start
+	unvisited := NewPC[T]()
+	unvisited.Push(start, 0)
+	visited := make(map[T]bool)
 
-	for len(unvisited) > 0 {
-		// find the node with the smallest distance
-		nearestPoint := unvisited[0]
+	for unvisited.Len() > 0 {
+		nearestPoint := unvisited.Pop()
 
 		if nearestPoint == end {
 			break
 		}
 
-		// remove the node from the unvisited list
-		unvisited = slices.DeleteFunc(unvisited, func(p T) bool {
-			return p == nearestPoint
-		})
+		visited[nearestPoint] = true
 
 		// update neighbour distances and add them to the unvisited list
 		for _, neighbour := range neighbourMap[nearestPoint] {
+			if visited[neighbour.To] {
+				continue
+			}
 			newDistance := distances[nearestPoint] + neighbour.Weight
 			if newDistance < distances[neighbour.To] {
 				distances[neighbour.To] = newDistance
 				previos[neighbour.To] = nearestPoint
-				if !slices.Contains(unvisited, neighbour.To) {
-					if len(unvisited) == 0 {
-						unvisited = append(unvisited, neighbour.To)
-					} else {
-						for i, un := range unvisited {
-							distOfUnvisitedInArr := distances[un]
-							if distances[neighbour.To] <= distOfUnvisitedInArr {
-								if i-1 < 0 {
-									unvisited = slices.Insert(unvisited, 0, neighbour.To)
-									break
-								} else {
-									unvisited = slices.Insert(unvisited, i-1, neighbour.To)
-									break
-								}
-							}
-						}
-					}
+				if !unvisited.Contains(neighbour.To) {
+					unvisited.Push(neighbour.To, newDistance)
+				} else {
+					unvisited.UpdatePriority(neighbour.To, newDistance)
 				}
-			}
-			if !slices.Contains(unvisited, neighbour.To) {
-				unvisited = append(unvisited, neighbour.To)
 			}
 		}
 	}

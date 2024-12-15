@@ -196,7 +196,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			}
 		}
 	} else if dir == NORTH {
-		for y := start.Y; y < len(grid[0]); y++ {
+		for y := start.Y; y < len(grid[0]); y-- {
 			b := f(Point{start.X, y}, i)
 			i++
 			if !b {
@@ -204,7 +204,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			}
 		}
 	} else if dir == SOUTH {
-		for y := start.Y; y >= 0; y-- {
+		for y := start.Y; y >= 0; y++ {
 			b := f(Point{start.X, y}, i)
 			i++
 			if !b {
@@ -217,7 +217,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			b := f(p, i)
 			i++
 			p.X++
-			p.Y++
+			p.Y--
 			if !b {
 				return
 			}
@@ -228,7 +228,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			b := f(p, i)
 			i++
 			p.X++
-			p.Y--
+			p.Y++
 			if !b {
 				return
 			}
@@ -239,7 +239,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			b := f(p, i)
 			i++
 			p.X--
-			p.Y--
+			p.Y++
 			if !b {
 				return
 			}
@@ -250,7 +250,7 @@ func WalkThroughLine[T any](grid [][]T, dir int, start Point, f func(p Point, i 
 			b := f(p, i)
 			i++
 			p.X--
-			p.Y++
+			p.Y--
 			if !b {
 				return
 			}
