@@ -3,6 +3,7 @@ package main
 import (
 	"AOC/h"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -77,70 +78,148 @@ func genNeis(grid h.Grid) h.NeighbourMap[h.Point] {
 	return neis
 }
 
+var numPadStr = "789\n456\n123\n 0A"
+var dirPadStr = " na\nwse"
+var numPadGrid = h.ConvertLinesToGrid(strings.Split(numPadStr, "\n"))
+var dirPadGrid = h.ConvertLinesToGrid(strings.Split(dirPadStr, "\n"))
+var numPadStartPos = h.Point{2, 3}
+var dirPadStartPos = h.Point{2, 0}
+var dirPadPositions = []h.Point{dirPadStartPos, dirPadStartPos, dirPadStartPos}
+var numPadPosition = numPadStartPos
+
+func BFS(nei h.Grid, st h.Point, goal h.Point, doNotEnter h.Point) []h.Point {
+	pos := st
+	path := []h.Point{pos}
+	failed := false
+	// x first
+	for goal.X > pos.X {
+		pos.X++
+		path = append(path, pos)
+		if pos == doNotEnter {
+			failed = true
+		}
+	}
+	for goal.X < pos.X {
+		pos.X--
+		path = append(path, pos)
+		if pos == doNotEnter {
+			failed = true
+		}
+	}
+	for goal.Y > pos.Y {
+		pos.Y++
+		path = append(path, pos)
+		if pos == doNotEnter {
+			failed = true
+		}
+	}
+	for goal.Y < pos.Y {
+		pos.Y--
+		path = append(path, pos)
+		if pos == doNotEnter {
+			failed = true
+		}
+	}
+
+	if failed {
+		pos = st
+		path = []h.Point{pos}
+		// y first
+		for goal.Y > pos.Y {
+			pos.Y++
+
+			path = append(path, pos)
+		}
+		for goal.Y < pos.Y {
+			pos.Y--
+			path = append(path, pos)
+		}
+		for goal.X > pos.X {
+			pos.X++
+			path = append(path, pos)
+
+		}
+		for goal.X < pos.X {
+			pos.X--
+			path = append(path, pos)
+		}
+	}
+
+	return path
+}
+
+func dirPadPath(from h.Point, to h.Point, dirPadIndex int) []h.Point {
+	dir := getDirOfWalk(from, to)
+	char := getCharFromDir(dir)
+	goal := findPositionInGrid(dirPadGrid, char)
+	pathDirPad1 := BFS(numPadGrid, dirPadPositions[dirPadIndex], goal, h.Point{0, 0})
+	dirPadPositions[dirPadIndex] = goal
+	return pathDirPad1
+}
+
+func printPath(paths [][]h.Point) {
+	fmt.Println("Path: ")
+	for _, path := range paths {
+		for i := 1; i < len(path); i++ {
+			dir := getDirOfWalk(path[i-1], path[i])
+			char := getCharFromDir(dir)
+			fmt.Print(string(translateBack(char)))
+		}
+		fmt.Print("A")
+	}
+	fmt.Println()
+}
+
 func part1() {
 	sum := 0
 	lines := h.GetLinesAsSlice()
-	numPadStr := "789\n456\n123\n 0A"
-	dirPadStr := " na\nwse"
-	numPadGrid := h.ConvertLinesToGrid(strings.Split(numPadStr, "\n"))
-	dirPadGrid := h.ConvertLinesToGrid(strings.Split(dirPadStr, "\n"))
-	h.PrintGrid(numPadGrid)
-	h.PrintGrid(dirPadGrid)
-	numPadNeis := genNeis(numPadGrid)
-	dirPadNeis := genNeis(dirPadGrid)
-	numPadStartPos := h.Point{2, 3}
-	dirPadStartPos := h.Point{2, 0}
-	dirPadPositions := []h.Point{dirPadStartPos, dirPadStartPos}
-	numPadPosition := numPadStartPos
 
 	charsToPress := []byte{}
 
 	for _, l := range lines {
 		for _, r := range l {
-			pathNumPad, _ := h.Dijkstra(numPadNeis, numPadPosition, findPositionInGrid(numPadGrid, byte(r)))
-			numPadPosition = numPadStartPos
-			for i, newP := range pathNumPad {
-				if i == 0 {
-					continue
+			goal := findPositionInGrid(numPadGrid, byte(r))
+			pathToRune := BFS(numPadGrid, numPadPosition, goal, h.Point{0, 3})
+			numPadPosition = goal
+
+			pathOnDirPad1 := [][]h.Point{}
+			for i := 1; i < len(pathToRune); i++ {
+				pathOnDirpadToNextSign := dirPadPath(pathToRune[i-1], pathToRune[i], 0)
+				pathOnDirPad1 = append(pathOnDirPad1, pathOnDirpadToNextSign)
+			}
+			// append back to a
+			dijkstraToAPath := BFS(dirPadGrid, dirPadPositions[0], dirPadStartPos, h.Point{0, 0})
+			pathOnDirPad1 = append(pathOnDirPad1, dijkstraToAPath)
+			dirPadPositions[0] = dirPadStartPos
+
+			pathOnDirPad2 := [][]h.Point{}
+			for _, path := range pathOnDirPad1 {
+				for i := 1; i < len(path); i++ {
+					pathOnDirpadToNextSign := dirPadPath(path[i-1], path[i], 1)
+					pathOnDirPad2 = append(pathOnDirPad2, pathOnDirpadToNextSign)
 				}
-				dir := getDirOfWalk(pathNumPad[i-1], newP)
-				char := getCharFromDir(dir)
-				pathDirPad1, _ := h.Dijkstra(dirPadNeis, dirPadPositions[0], findPositionInGrid(dirPadGrid, char))
-				dirPadPositions[0] = pathDirPad1[len(pathDirPad1)-1]
-				toA, _ := h.Dijkstra(dirPadNeis, dirPadPositions[0], dirPadStartPos)
-				pathDirPad1 = append(pathDirPad1, toA[1:]...)
-				dirPadPositions[0] = dirPadStartPos
-				for j, newP1 := range pathDirPad1 {
-					if j == 0 {
-						continue
-					}
-					dir1 := getDirOfWalk(pathDirPad1[j-1], newP1)
-					char1 := getCharFromDir(dir1)
-					pathDirPad2, _ := h.Dijkstra(dirPadNeis, dirPadPositions[1], findPositionInGrid(dirPadGrid, char1))
-					dirPadPositions[1] = pathDirPad2[len(pathDirPad2)-1]
-					pressPosition := dirPadPositions[1]
-					toA1, _ := h.Dijkstra(dirPadNeis, dirPadPositions[1], dirPadStartPos)
-					pathDirPad2 = append(pathDirPad2, toA1[1:]...)
-					dirPadPositions[1] = dirPadStartPos
-					for k, newP2 := range pathDirPad2 {
-						if k == 0 {
-							continue
-						}
-						if newP2 == pressPosition {
-							fmt.Print(string('A'))
-						}
-						dir2 := getDirOfWalk(pathDirPad2[k-1], newP2)
-						char2 := getCharFromDir(dir2)
-						fmt.Print(string(translateBack(char2)))
-						charsToPress = append(charsToPress, char2)
-					}
-					fmt.Print(string('A'))
+				// append back to a
+				dijkstraToAPath = BFS(dirPadGrid, dirPadPositions[1], dirPadStartPos, h.Point{0, 0})
+				pathOnDirPad2 = append(pathOnDirPad2, dijkstraToAPath)
+				dirPadPositions[1] = dirPadStartPos
+			}
+
+			for _, path := range pathOnDirPad2 {
+				for i := 1; i < len(path); i++ {
+					dir := getDirOfWalk(path[i-1], path[i])
+					char := getCharFromDir(dir)
+					charsToPress = append(charsToPress, translateBack(char))
 				}
+				charsToPress = append(charsToPress, 'A')
 			}
 		}
+		seq := strings.Join(h.Map(charsToPress, func(c byte) string { return string(c) }), "")
+		fmt.Println(seq)
+		n, _ := strconv.Atoi(strings.Split(l, "A")[0])
+		sum += len(seq) * n
+		charsToPress = []byte{}
 	}
 
-	fmt.Println(charsToPress)
 	fmt.Println(sum)
 }
 
